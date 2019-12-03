@@ -1,10 +1,10 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
 
+import './App.css'
 
 export default class App extends Component {
   state = {
     title: 'Task Manager',
-    color: '#000',
     task: "",
     tasks: []
   }
@@ -17,45 +17,44 @@ export default class App extends Component {
   saveTask = () => {
     this.setState({
       "task": "",
-      "tasks": [...this.state.tasks, this.state.task]
+      "tasks": [...this.state.tasks, [this.state.task, false]]
     })
   }
    
   createTask() {
     return this.state.tasks.map( (x, index)  => { 
       return (
-      <Fragment key={index}>
-        <li className="d-inline-flex w-100 mb-3">
-            <div className="list-group-item list-group-item-action list-group-item-light" onClick={this.validTask.bind(this, x)}>{x}</div>
-            <button className="btn btn-danger ml-2" onClick={this.deleteTask.bind(this, x)}> X </button>
+        <li className="d-inline-flex w-100 mb-3" key={index}>
+          {x[1] === true && <div className="list-group-item list-group-item-action list-group-item-success" onClick={this.validTask.bind(this, x)}>{x}</div>}
+          {x[1] === false && <div className="list-group-item list-group-item-action list-group-item-light" onClick={this.validTask.bind(this, x)}>{x}</div>}
+          <button className="btn btn-danger ml-2" onClick={this.deleteTask.bind(this, x)}> X </button>
         </li>
-      </Fragment>)
+      )
     })
   }
 
   deleteTask(task){
     let array = this.state.tasks
     let index = array.indexOf(task)
+    
     array.splice(index, 1)
+    
     this.setState({"tasks": array})
   }
 
   validTask(task, e){
-    // let array = this.state.tasks
-    // let index = array.indexOf(task)
-    // console.log(this.state.tasks)
-    // console.log(index)
-    // console.log(e.target)
-    // console.log(array[index] + " - Validé!")
-    // console.log(task)
-    // // e.target.className = "list-group-item list-group-item-action list-group-item-success"
-    // array[index] += " - Validé!"
-    // task += " - Validé"
-    // this.setState({ "tasks": array })
+    let array = this.state.tasks
+    let index = array.indexOf(task)
+
+    if (array[index][1] === false) {
+      e.target.textContent += " - Validé!"
+      array[index] = [e.target.textContent, true]
+    } else {
+      e.target.textContent = e.target.textContent.replace(RegExp("- validé!", "i"), "")
+      array[index] = [e.target.textContent, false]
+    }
     
-    e.target.classList.toggle('list-group-item-light')
-    e.target.classList.toggle('list-group-item-success')
-    RegExp("validé!", "i").test(e.target.textContent) ? e.target.textContent = e.target.textContent.replace(RegExp("- validé!", "i"), "") : e.target.textContent += " - Validé!"
+    this.setState({ "tasks": array })
   }
 
   handleKeyPress= e => {
@@ -66,13 +65,15 @@ export default class App extends Component {
 
   render() {
     return (
-      <div className="container-fluid d-flex flex-column my-5 align-items-center">
-        <h1 className="text-center my-5" >{ this.state.title }</h1>
-        <div className="form-group d-flex flex-row w-75 my-5 ">
-          <input type="text" placeholder="Saisissez une tâche à enregistrer..." className="form-control" value={this.state.task} onChange={(e) => this.handleTask(e)} onKeyPress={this.handleKeyPress} />
-          <input type="submit" className="btn btn-outline-secondary ml-2" value="Enregistrer" onClick={this.saveTask}/>
+      <div className="task-manager container-fluid d-flex flex-column align-items-center bg-dark h-100">
+        <h1 className="text-center my-5 text-light" >{ this.state.title }</h1>
+        <div className="form-group d-flex flex-row w-75 my-5">
+          <input type="text" placeholder="Saisissez une tâche à enregistrer..." className="form-control bg-light" value={this.state.task} onChange={(e) => this.handleTask(e)} onKeyPress={this.handleKeyPress} />
+          <input type="submit" className="btn btn-outline-light ml-2" value="Enregistrer" onClick={this.saveTask}/>
         </div>
-        <h5 className="my-5">Liste des tâches :</h5>
+        {
+          this.state.tasks.length !== 0 && <h5 className="my-5 text-light">Liste des tâches :</h5>
+        }
         <ul className="list-group list-group w-75 p-0">
           {this.createTask()}
         </ul>

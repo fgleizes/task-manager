@@ -31,3 +31,8 @@
     transform: rotate(360deg);
   }
 }
+
+.task-manager {
+  min-height: 100vh;
+  /* height: 100vh; */
+}
